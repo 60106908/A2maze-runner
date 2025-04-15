@@ -159,61 +159,65 @@ class Explorer:
 
     def solve(self) -> Tuple[float, List[Tuple[int, int]]]:
         """
-        Solve the maze using the right-hand rule algorithm with backtracking.
+        Solve the maze using BFS (Breadth-First Search) algorithm.
         Returns the time taken and the list of moves made.
         """
         self.start_time = time.time()
-        
-        # Keep track of visited positions to detect loops
-        visited = set()
-        visited.add((self.x, self.y))
-        
+
+        start = self.maze.start_pos
+        end = self.maze.end_pos
+
+        # BFS initialization
+        queue = deque([start])  # Queue of positions to explore
+        visited = set()  # Set of visited positions
+        parent = {start: None}  # Map of positions to their parent in the BFS tree
+
+        # BFS search loop
+        while queue:
+            current = queue.popleft()
+            if current == end:
+                break
+
+            # Explore neighbors (up, down, left, right)
+            for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                new_x, new_y = current[0] + dx, current[1] + dy
+                if (0 <= new_x < self.maze.width and 
+                    0 <= new_y < self.maze.height and 
+                    self.maze.grid[new_y][new_x] == 0 and  # Not a wall
+                    (new_x, new_y) not in visited):
+                    visited.add((new_x, new_y))
+                    queue.append((new_x, new_y))
+                    parent[(new_x, new_y)] = current
+
+        # Reconstruct the path from start to end using the parent map
+        path = []
+        current = end
+        while current != start:
+            path.append(current)
+            current = parent[current]
+        path.append(start)
+
+        # Reverse the path to get it from start to end
+        path.reverse()
+
+        # Update moves list with the new path
+        self.moves = path
+
+        # Simulate the movement (optional for visualization)
         if self.visualize:
-            self.draw_state()
-        
-        while (self.x, self.y) != self.maze.end_pos:
-            if self.is_stuck():
-                # If stuck, try backtracking
-                if not self.backtrack():
-                    # If backtracking fails, try a different direction
-                    self.turn_left()
-                    self.turn_left()  # Turn around
-                    self.move_forward()
-                self.backtracking = True
-            else:
-                self.backtracking = False
-                # Try to turn right first
-                self.turn_right()
-                if self.can_move_forward():
-                    self.move_forward()
-                    visited.add((self.x, self.y))
-                else:
-                    # If we can't move right, try forward
-                    self.turn_left()
-                    if self.can_move_forward():
-                        self.move_forward()
-                        visited.add((self.x, self.y))
-                    else:
-                        # If we can't move left, try left again
-                        self.turn_left()
-                        if self.can_move_forward():
-                            self.move_forward()
-                            visited.add((self.x, self.y))
-                        else:
-                            # If we can't move left, turn around and go
-                            self.turn_left()
-                            self.move_forward()
-                            visited.add((self.x, self.y))
+            for move in path:
+                self.x, self.y = move
+                self.draw_state()
 
         self.end_time = time.time()
         time_taken = self.end_time - self.start_time
         
+        # Finalize visualization
         if self.visualize:
-            # Show final state for a few seconds
             pygame.time.wait(2000)
             pygame.quit()
-        
-        # Print detailed statistics
+
+        # Print statistics
         self.print_statistics(time_taken)
-            
-        return time_taken, self.moves
+
+        return time_taken, path
