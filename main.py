@@ -11,9 +11,9 @@ def main():
     parser = argparse.ArgumentParser(description="Maze Runner Game")
     parser.add_argument("--type", choices=["random", "static"], default="random",
                         help="Type of maze to generate (random or static)")
-    parser.add_argument("--width", type=int, default=30,
+    parser.add_argument("--width", type=int, default=50,
                         help="Width of the maze (default: 30, ignored for static mazes)")
-    parser.add_argument("--height", type=int, default=30,
+    parser.add_argument("--height", type=int, default=50,
                         help="Height of the maze (default: 30, ignored for static mazes)")
     parser.add_argument("--auto", action="store_true",
                         help="Run automated maze exploration")
