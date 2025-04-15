@@ -1,20 +1,15 @@
 """
 Maze Explorer module that implements automated maze solving.
-
-Commit: Added enhanced loop detection and backtracking logic. 
-Explorer now uses a history of the last 3 moves to detect being stuck, 
-and intelligently backtracks to previous positions with multiple choices. 
-Statistics for backtracking and performance are also printed.
 """
 
 import time
 import pygame
 from typing import Tuple, List, Optional, Deque
 from collections import deque
-from .constants import BLUE, WHITE, CELL_SIZE, WINDOW_SIZE
+from src.constants import BLUE, WHITE, CELL_SIZE, WINDOW_SIZE
 
 class Explorer:
-    def __init__(self, maze, visualize: bool = False,solver=None):
+    def __init__(self, maze, visualize: bool = False):
         self.maze = maze
         self.x, self.y = maze.start_pos
         self.direction = (1, 0)  # Start facing right
@@ -194,13 +189,13 @@ class Explorer:
                         self.move_forward()
                         visited.add((self.x, self.y))
                     else:
-                        # If we can't move left, try left again
+                        # If we can't move forward, try left
                         self.turn_left()
                         if self.can_move_forward():
                             self.move_forward()
                             visited.add((self.x, self.y))
                         else:
-                            # If we can't move left, turn around and go
+                            # If we can't move left, turn around
                             self.turn_left()
                             self.move_forward()
                             visited.add((self.x, self.y))
@@ -216,4 +211,4 @@ class Explorer:
         # Print detailed statistics
         self.print_statistics(time_taken)
             
-        return time_taken, self.moves
+        return time_taken, self.moves 
